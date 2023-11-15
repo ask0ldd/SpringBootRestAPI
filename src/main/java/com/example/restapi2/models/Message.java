@@ -16,8 +16,8 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "from")
-    private Integer from;
+    @Column(name = "sender")
+    private Integer sender;
 
     @Column(name = "recipient")
     private Integer recipient;
