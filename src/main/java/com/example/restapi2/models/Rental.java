@@ -18,8 +18,17 @@ public class Rental {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "owner")
+    private Integer owner;
+
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "description")
-    private String body;
+    private String description;
+
+    @Column(name = "picture")
+    private String picture;
 
     @Column(name = "surface")
     private Integer surface;
