@@ -40,8 +40,9 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    // !!! why default constructor needed?
-    // public User() { }
+    // !!! https://www.baeldung.com/jpa-no-argument-constructor-entity-class
+    public User() {
+    }
 
     public User(String firstName, String lastName, String email, String password) {
         this.firstname = firstName;
