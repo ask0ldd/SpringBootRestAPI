@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.restapi2.models.User;
@@ -114,6 +115,23 @@ public class UserServiceTest {
             Assertions.assertThat(itUser.getEmail()).isEqualTo(userCollection.get(i).getEmail());
             i++;
         }
+    }
+
+    @Test
+    @DisplayName("User exists : .loadUserByUsername(email) should return the expected User")
+    public void loadUserByUsername() {
+
+        when(userRepository.findByEmail(Mockito.any())).thenReturn(Optional.ofNullable(user1));
+
+        Optional<User> collectedUser = userService.getUserByEmail("email@domain.com");
+
+        Assertions.assertThat(collectedUser).isNotNull();
+        Assertions.assertThat(collectedUser.isPresent()).isTrue();
+        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user1.getFirstname());
+        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
+        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
+        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
     }
 
 }
