@@ -24,12 +24,9 @@ public class Restapi2Application implements CommandLineRunner {
 
 		// BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-		userService.saveUser(new User("Laurent", "GINA", "laurentgina@mail.com",
-				/* passwordEncoder.encode("laurent") */"laurent"));
-		userService.saveUser(new User("Sophie", "FONCEK", "sophiefoncek@mail.com",
-				/* passwordEncoder.encode("sophie") */"sophie"));
-		userService.saveUser(new User("Agathe", "FEELING", "agathefeeling@mail.com",
-				/* passwordEncoder.encode("agathe") */"agathe"));
+		userService.saveUser(new User(null, "Laurent", "GINA", "laurentgina@mail.com", "laurent"));
+		userService.saveUser(new User(null, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie"));
+		userService.saveUser(new User(null, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe"));
 	}
 
 }
