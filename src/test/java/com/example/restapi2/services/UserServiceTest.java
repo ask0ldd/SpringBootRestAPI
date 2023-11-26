@@ -1,5 +1,6 @@
 package com.example.restapi2.services;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class UserServiceTest {
     @DisplayName("User exists : .getUser(id) should return the expected User")
     public void getUser_ReturnOneUser() {
 
-        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user1));
+        when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(user1));
 
         Optional<User> collectedUser = userService.getUser(1L);
 
@@ -54,6 +55,17 @@ public class UserServiceTest {
         Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
         Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
         Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
+    }
+
+    @Test
+    @DisplayName("User doesn't exist : .getUser(id) should return an empty Optional")
+    public void getUser_ReturnEmptyOptional() {
+
+        when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(null));
+
+        Optional<User> collectedUser = userService.getUser(1L);
+        
+        Assertions.assertThat(collectedUser.isEmpty()).isEqualTo(true);
     }
 
     /*
@@ -117,9 +129,11 @@ public class UserServiceTest {
         }
     }
 
+    // .getUserByEmail(email)
+
     @Test
-    @DisplayName("User exists : .loadUserByUsername(email) should return the expected User")
-    public void loadUserByUsername() {
+    @DisplayName("User exists : .getUserByEmail(email) should return the expected User")
+    public void getUserByEmail_ReturnOneUser() {
 
         when(userRepository.findByEmail(Mockito.any())).thenReturn(Optional.ofNullable(user1));
 
@@ -132,6 +146,17 @@ public class UserServiceTest {
         Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
         Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
         Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
+    }
+
+    @Test
+    @DisplayName("User doesn't exist : .getUserByEmail(email) should return an emptyOptional")
+    public void getUserByEmail_ReturnEmptyOptional() {
+
+        when(userRepository.findByEmail(Mockito.any())).thenReturn(Optional.ofNullable(null));
+
+        Optional<User> collectedUser = userService.getUserByEmail("email@domain.com");
+        
+        Assertions.assertThat(collectedUser.isEmpty()).isEqualTo(true);
     }
 
 }
