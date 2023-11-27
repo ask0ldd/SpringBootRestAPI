@@ -1,6 +1,11 @@
 package com.example.restapi2.services;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -51,6 +56,8 @@ public class UserServiceTest {
 
         Optional<User> collectedUser = userService.getUser(1L);
 
+        verify(userRepository, times(1)).findById(Mockito.anyLong());
+
         Assertions.assertThat(collectedUser.isPresent()).isTrue();
         Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
         Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user1.getFirstname());
@@ -63,7 +70,7 @@ public class UserServiceTest {
     @DisplayName("User doesn't exist : .getUser(id) should return an empty Optional")
     public void getUser_ReturnEmptyOptional() {
 
-        when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(null));
+        when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(null));
 
         Optional<User> collectedUser = userService.getUser(1L);
         
@@ -116,6 +123,9 @@ public class UserServiceTest {
         when(userRepository.findAll()).thenReturn((Iterable<User>) userCollection);
 
         Iterable<User> collectedUsers = userService.getUsers();
+
+        verify(userRepository, times(1)).findAll();
+
         Iterator<User> it = collectedUsers.iterator();
         // collectedUsers.forEach(null);
 
@@ -140,6 +150,8 @@ public class UserServiceTest {
         when(userRepository.findByEmail(Mockito.any())).thenReturn(Optional.ofNullable(user1));
 
         Optional<User> collectedUser = userService.getUserByEmail("email@domain.com");
+
+        verify(userRepository, times(1)).findByEmail(Mockito.anyString());
 
         Assertions.assertThat(collectedUser).isNotNull();
         Assertions.assertThat(collectedUser.isPresent()).isTrue();
@@ -169,13 +181,31 @@ public class UserServiceTest {
 
         when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
 
+        verify(userRepository, times(3)).save(Mockito.any(User.class));
+
         User collectedUser = userService.saveUser(user1);
+
+        verify(userRepository, times(4)).save(Mockito.any(User.class));
 
         Assertions.assertThat(collectedUser).isNotNull();
         Assertions.assertThat(collectedUser.getFirstname()).isEqualTo(user1.getFirstname());
         Assertions.assertThat(collectedUser.getLastname()).isEqualTo(user1.getLastname());
         Assertions.assertThat(collectedUser.getPassword()).isEqualTo(user1.getPassword());
         Assertions.assertThat(collectedUser.getEmail()).isEqualTo(user1.getEmail());
+    }
+
+    // deleteUser(id)
+
+    @Test
+    @DisplayName("Delete User")
+    public void deleteUser() {
+
+        // doNothing().when(userRepository.deleteById(Mockito.any()));
+
+        userService.deleteUser(1L);
+
+        // called 3 times during init + one time right before this verification
+        verify(userRepository, times(4)).save(Mockito.any());
     }
 
 }
