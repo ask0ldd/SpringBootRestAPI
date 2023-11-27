@@ -22,12 +22,16 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Optional<User> getUser(final Long id) {
-        return userRepository.findById(id);
+    public User getUser(final Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Target user can't be found."));
+        return user;
     }
 
-    public Optional<User> getUserByEmail(final String email) {
-        return userRepository.findByEmail(email);
+    public User getUserByEmail(final String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Target user can't be found."));
+        return user;
     }
 
     public Iterable<User> getUsers() {
@@ -36,7 +40,7 @@ public class UserService {
 
     public void deleteUser(final Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("The target user can't be deleted."));
+                .orElseThrow(() -> new UserNotFoundException("Target user can't be deleted."));
         userRepository.delete(user);
     }
 

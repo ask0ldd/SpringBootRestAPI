@@ -1,15 +1,12 @@
 package com.example.restapi2.services;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -26,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.example.restapi2.exceptions.UserNotFoundException;
 import com.example.restapi2.models.User;
 import com.example.restapi2.repositories.UserRepository;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -56,16 +52,16 @@ public class UserServiceTest {
 
         when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(user1));
 
-        Optional<User> collectedUser = userService.getUser(1L);
+        User collectedUser = userService.getUser(1L);
 
         verify(userRepository, times(1)).findById(Mockito.anyLong());
 
-        Assertions.assertThat(collectedUser.isPresent()).isTrue();
-        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
-        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user1.getFirstname());
-        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
-        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
-        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
+        Assertions.assertThat(collectedUser).isNotNull();
+        Assertions.assertThat(collectedUser.getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.getFirstname()).isEqualTo(user1.getFirstname());
+        Assertions.assertThat(collectedUser.getLastname()).isEqualTo(user1.getLastname());
+        Assertions.assertThat(collectedUser.getPassword()).isEqualTo(user1.getPassword());
+        Assertions.assertThat(collectedUser.getEmail()).isEqualTo(user1.getEmail());
     }
 
     @Test
@@ -74,9 +70,12 @@ public class UserServiceTest {
 
         when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(null));
 
-        Optional<User> collectedUser = userService.getUser(1L);
-        
-        Assertions.assertThat(collectedUser.isEmpty()).isEqualTo(true);
+        Exception exception = assertThrows(UserNotFoundException.class, () -> { 
+            userService.getUser(1L);
+        });
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Target user can't be found.");
+        verify(userRepository, times(1)).findById(Mockito.anyLong());
     }
 
     /*
@@ -151,28 +150,30 @@ public class UserServiceTest {
 
         when(userRepository.findByEmail(Mockito.any())).thenReturn(Optional.ofNullable(user1));
 
-        Optional<User> collectedUser = userService.getUserByEmail("email@domain.com");
+        User collectedUser = userService.getUserByEmail("email@domain.com");
 
         verify(userRepository, times(1)).findByEmail(Mockito.anyString());
 
         Assertions.assertThat(collectedUser).isNotNull();
-        Assertions.assertThat(collectedUser.isPresent()).isTrue();
-        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
-        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user1.getFirstname());
-        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
-        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
-        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
+        Assertions.assertThat(collectedUser.getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.getFirstname()).isEqualTo(user1.getFirstname());
+        Assertions.assertThat(collectedUser.getLastname()).isEqualTo(user1.getLastname());
+        Assertions.assertThat(collectedUser.getPassword()).isEqualTo(user1.getPassword());
+        Assertions.assertThat(collectedUser.getEmail()).isEqualTo(user1.getEmail());
     }
 
     @Test
     @DisplayName("User doesn't exist : .getUserByEmail(email) should return an emptyOptional")
     public void getUserByEmail_ReturnEmptyOptional() {
 
-        when(userRepository.findByEmail(Mockito.any())).thenReturn(Optional.ofNullable(null));
+        when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.ofNullable(null));
 
-        Optional<User> collectedUser = userService.getUserByEmail("email@domain.com");
-        
-        Assertions.assertThat(collectedUser.isEmpty()).isEqualTo(true);
+        Exception exception = assertThrows(UserNotFoundException.class, () -> { 
+            userService.getUserByEmail("email@domain.com");
+        });
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Target user can't be found.");
+        verify(userRepository, times(1)).findByEmail(Mockito.anyString());
     }
 
     // saveUser(user)
@@ -220,7 +221,7 @@ public class UserServiceTest {
             userService.deleteUser(1L);
         });
         
-        Assertions.assertThat(exception.getMessage()).isEqualTo("The target user can't be deleted.");
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Target user can't be deleted.");
         verify(userRepository, times(1)).findById(Mockito.anyLong());
     }
 
