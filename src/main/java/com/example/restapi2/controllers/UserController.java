@@ -1,7 +1,5 @@
 package com.example.restapi2.controllers;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,20 +38,20 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> getUserByEmail(@RequestBody String email) {
-        Optional<User> userOptional = userService.getUserByEmail(email);
-        if (userOptional.isPresent()) {
-            return new ResponseEntity<>(userOptional.get(), HttpStatus.OK);
-        } else {
+        try {
+            User currentUser = userService.getUserByEmail(email);
+            return new ResponseEntity<>(currentUser, HttpStatus.OK);
+        } catch (Exception exception) {
             return new ResponseEntity<>("Can't find the requested User.", HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUser(@PathVariable("id") final Long id) {
-        Optional<User> userOptional = userService.getUser(id);
-        if (userOptional.isPresent()) {
-            return new ResponseEntity<>(userOptional.get(), HttpStatus.OK);
-        } else {
+        try {
+            User currentUser = userService.getUser(id);
+            return new ResponseEntity<>(currentUser, HttpStatus.OK);
+        } catch (Exception exception) {
             return new ResponseEntity<>("Can't find the requested User.", HttpStatus.NOT_FOUND);
         }
     }
@@ -65,9 +63,8 @@ public class UserController {
 
     @PutMapping("/user/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable("id") final Long id, @RequestBody User user) {
-        Optional<User> userOptional = userService.getUser(id);
-        if (userOptional.isPresent()) {
-            User currentUser = userOptional.get();
+        User currentUser = userService.getUser(id);
+        if (currentUser != null) {
 
             String firstName = user.getFirstname();
             if (firstName != null && validationService.isName(firstName)) {
