@@ -200,10 +200,10 @@ public class UserServiceTest {
     @DisplayName("Delete User")
     public void deleteUser() {
 
-        doNothing().when(userRepository).deleteById(Mockito.anyLong());
+        doNothing().when(userRepository).delete(Mockito.any(User.class));
 
         userService.deleteUser(1L);
-        verify(userRepository, times(1)).deleteById(Mockito.anyLong());
+        verify(userRepository, times(1)).delete(Mockito.any(User.class));
     }
 
 }

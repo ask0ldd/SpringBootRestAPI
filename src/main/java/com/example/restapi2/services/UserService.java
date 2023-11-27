@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.restapi2.exceptions.UserNotFoundException;
 import com.example.restapi2.models.User;
 import com.example.restapi2.repositories.UserRepository;
 
@@ -34,7 +35,9 @@ public class UserService {
     }
 
     public void deleteUser(final Long id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("The target user can't be deleted."));
+        userRepository.delete(user);
     }
 
     public User saveUser(User user) {
