@@ -41,6 +41,8 @@ public class UserServiceTest {
         userService.saveUser(user3);
     }
 
+    // .getUser(id)
+
     @Test
     @DisplayName("User exists : .getUser(id) should return the expected User")
     public void getUser_ReturnOneUser() {
@@ -157,6 +159,23 @@ public class UserServiceTest {
         Optional<User> collectedUser = userService.getUserByEmail("email@domain.com");
         
         Assertions.assertThat(collectedUser.isEmpty()).isEqualTo(true);
+    }
+
+    // saveUser(user)
+
+    @Test
+    @DisplayName("Save User")
+    public void saveUser() {
+
+        when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
+
+        User collectedUser = userService.saveUser(user1);
+
+        Assertions.assertThat(collectedUser).isNotNull();
+        Assertions.assertThat(collectedUser.getFirstname()).isEqualTo(user1.getFirstname());
+        Assertions.assertThat(collectedUser.getLastname()).isEqualTo(user1.getLastname());
+        Assertions.assertThat(collectedUser.getPassword()).isEqualTo(user1.getPassword());
+        Assertions.assertThat(collectedUser.getEmail()).isEqualTo(user1.getEmail());
     }
 
 }
