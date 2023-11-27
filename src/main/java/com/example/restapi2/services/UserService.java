@@ -1,6 +1,5 @@
 package com.example.restapi2.services;
 
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,10 @@ public class UserService {
     }
 
     public Iterable<User> getUsers() {
-        return userRepository.findAll();
+        Iterable<User> users = userRepository.findAll();
+        if (!users.iterator().hasNext())
+            throw new UserNotFoundException("No user can be found.");
+        return users;
     }
 
     public void deleteUser(final Long id) {

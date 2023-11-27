@@ -37,12 +37,14 @@ public class UserServiceTest {
     private final User user2 = new User(2L, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie");
     private final User user3 = new User(3L, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe");
 
-    @BeforeEach
-    public void init() {
-        userService.saveUser(user1);
-        userService.saveUser(user2);
-        userService.saveUser(user3);
-    }
+    /*
+     * @BeforeEach
+     * public void init() {
+     * userService.saveUser(user1);
+     * userService.saveUser(user2);
+     * userService.saveUser(user3);
+     * }
+     */
 
     // .getUser(id)
 
@@ -51,6 +53,8 @@ public class UserServiceTest {
     public void getUser_ReturnOneUser() {
 
         when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(user1));
+
+        verify(userRepository, times(0)).findById(Mockito.anyLong());
 
         User collectedUser = userService.getUser(1L);
 
@@ -119,7 +123,7 @@ public class UserServiceTest {
         ArrayList<User> userCollection = new ArrayList<>();
         userCollection.add(user1);
         userCollection.add(user2);
-        userCollection.add(user2);
+        userCollection.add(user3);
 
         when(userRepository.findAll()).thenReturn((Iterable<User>) userCollection);
 
@@ -184,11 +188,11 @@ public class UserServiceTest {
 
         when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
 
-        verify(userRepository, times(3)).save(Mockito.any(User.class));
+        verify(userRepository, times(0)).save(Mockito.any(User.class));
 
         User collectedUser = userService.saveUser(user1);
 
-        verify(userRepository, times(4)).save(Mockito.any(User.class));
+        verify(userRepository, times(1)).save(Mockito.any(User.class));
 
         Assertions.assertThat(collectedUser).isNotNull();
         Assertions.assertThat(collectedUser.getFirstname()).isEqualTo(user1.getFirstname());
