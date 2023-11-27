@@ -23,8 +23,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.restapi2.exceptions.UserNotFoundException;
 import com.example.restapi2.models.User;
 import com.example.restapi2.repositories.UserRepository;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -198,12 +200,28 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("Delete User")
-    public void deleteUser() {
+    public void deleteUser_repoFindByIdAndRepoDeleteCalled() {
 
+        when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(user1));
         doNothing().when(userRepository).delete(Mockito.any(User.class));
 
         userService.deleteUser(1L);
+        verify(userRepository, times(1)).findById(Mockito.anyLong());
         verify(userRepository, times(1)).delete(Mockito.any(User.class));
+    }
+
+    @Test
+    @DisplayName("Try Deleting a non-existent User")
+    public void deleteNonExistentUser() {
+
+        when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(null));
+
+        Exception exception = assertThrows(UserNotFoundException.class, () -> {
+            userService.deleteUser(1L);
+        });
+        
+        Assertions.assertThat(exception.getMessage()).isEqualTo("The target user can't be deleted.");
+        verify(userRepository, times(1)).findById(Mockito.anyLong());
     }
 
 }
