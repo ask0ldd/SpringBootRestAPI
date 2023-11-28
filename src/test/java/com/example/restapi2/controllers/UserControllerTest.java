@@ -1,17 +1,23 @@
 package com.example.restapi2.controllers;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import java.util.ArrayList;
@@ -44,8 +50,9 @@ public class UserControllerTest {
     // Look at the bottom of the error to check if all required beans have been
     // loaded
     // Here validationService was missing at first
+    @DisplayName("get /users : Get all Users.")
     @Test
-    public void GetAllUsers_ReturnUser() throws Exception {
+    public void GetAllUsers_ReturnUsers() throws Exception {
         ArrayList<User> userCollection = new ArrayList<>();
         userCollection.add(user1);
         userCollection.add(user2);
@@ -65,7 +72,33 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[2].firstname", CoreMatchers.is("Agathe")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[2].lastname", CoreMatchers.is("FEELING")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[2].email", CoreMatchers.is("agathefeeling@mail.com")));
+    }
 
+    @DisplayName("get /user/{id} : Get Target User.")
+    @Test
+    public void GetUserById_ReturnUser() throws Exception {
+        given(userService.getUser(Mockito.anyLong())).willAnswer((invocation -> user1));
+
+        ResultActions response = mockMvc.perform(get("/user/1"));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("Laurent")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("GINA")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("laurentgina@mail.com")));
+    }
+
+    @DisplayName("post /user : Create User.")
+    @Test
+    public void CreateUser_ReturnUser() throws Exception {
+        given(userService.saveUser(ArgumentMatchers.any())).willAnswer((invocation -> invocation.getArgument(0)));
+
+        ResultActions response = mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user1)));
+
+        response.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("Laurent")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("GINA")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("laurentgina@mail.com")));
     }
 }
 
