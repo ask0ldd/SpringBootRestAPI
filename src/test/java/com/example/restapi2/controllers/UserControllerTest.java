@@ -4,7 +4,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-// import org.springframework.dao.DataAccessException; repository exception
+// import org.springframework.dao.DataAccessException; // repository exception
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import java.util.ArrayList;
 
@@ -127,13 +128,26 @@ public class UserControllerTest {
 
     @DisplayName("delete /user/id : Delete User.")
     @Test
-    public void DeleteUser_Exception() throws Exception {
+    public void DeleteUser_ReturnOk() throws Exception {
         doNothing().when(userService).deleteUser(Mockito.anyLong());
 
         ResultActions response = mockMvc.perform(delete("/user/1"));
 
         verify(userService, times(1)).deleteUser(Mockito.any());
         response.andExpect(MockMvcResultMatchers.status().isOk());
+        // message analysis
+    }
+
+    @DisplayName("delete /user/id : Failing.")
+    @Test
+    public void DeleteUser_Exception() throws Exception {
+        // when(userService).deleteUser(Mockito.anyLong());
+        Mockito.doThrow(new IllegalArgumentException()).when(userService).deleteUser(Mockito.any());
+
+        ResultActions response = mockMvc.perform(delete("/user/1"));
+
+        verify(userService, times(1)).deleteUser(Mockito.any());
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest());
         // message analysis
     }
 

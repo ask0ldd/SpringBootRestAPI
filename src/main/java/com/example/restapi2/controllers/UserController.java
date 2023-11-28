@@ -99,8 +99,13 @@ public class UserController {
     }
 
     @DeleteMapping("/user/{id}")
-    public void deleteUser(@PathVariable("id") final Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<?> deleteUser(@PathVariable("id") final Long id) {
+        try {
+            userService.deleteUser(id);
+            return new ResponseEntity<>("User with the following Id deleted : " + id, HttpStatus.OK);
+        } catch (Exception exception) {
+            return new ResponseEntity<>("Can't delete the target User.", HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
