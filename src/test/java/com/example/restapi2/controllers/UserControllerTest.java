@@ -4,7 +4,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
+// import org.springframework.dao.DataAccessException; repository exception
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +19,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import java.util.ArrayList;
 
@@ -77,10 +81,12 @@ public class UserControllerTest {
     @DisplayName("get /user/{id} : Get Target User.")
     @Test
     public void GetUserById_ReturnUser() throws Exception {
+        clearInvocations(userService);
         given(userService.getUser(Mockito.anyLong())).willAnswer((invocation -> user1));
 
         ResultActions response = mockMvc.perform(get("/user/1"));
 
+        verify(userService, times(1)).getUser(Mockito.anyLong());
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("Laurent")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("GINA")))
@@ -90,11 +96,13 @@ public class UserControllerTest {
     @DisplayName("post /user : Create User.")
     @Test
     public void CreateUser_ReturnUser() throws Exception {
+        clearInvocations(userService);
         given(userService.saveUser(ArgumentMatchers.any())).willAnswer((invocation -> invocation.getArgument(0)));
 
         ResultActions response = mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user1)));
 
+        verify(userService, times(1)).saveUser(Mockito.any());
         response.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("Laurent")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("GINA")))
@@ -103,12 +111,32 @@ public class UserControllerTest {
 
     @DisplayName("post /user : Invalid Request Body.")
     @Test
-    public void CreateInvalidUser_Exception() throws Exception {
+    public void CreateInvalidUser_BadRequest() throws Exception {
+        /*
+         * when(passwordEncoder.encode("1")).thenAnswer(invocation -> {
+         * throw new IllegalArgumentException();
+         * });
+         * when(passwordEncoder.encode("1")).thenThrow(new IOException());
+         */
         ResultActions response = mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString("invalid body")));
+                .content(objectMapper.writeValueAsString("invalid request body")));
 
         response.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        // message analysis
     }
+
+    @DisplayName("delete /user/id : Delete User.")
+    @Test
+    public void DeleteUser_Exception() throws Exception {
+        doNothing().when(userService).deleteUser(Mockito.anyLong());
+
+        ResultActions response = mockMvc.perform(delete("/user/1"));
+
+        verify(userService, times(1)).deleteUser(Mockito.any());
+        response.andExpect(MockMvcResultMatchers.status().isOk());
+        // message analysis
+    }
+
 }
 
 /*
