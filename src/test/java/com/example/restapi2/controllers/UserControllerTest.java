@@ -94,6 +94,8 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("laurentgina@mail.com")));
     }
 
+    // Create User
+
     @DisplayName("post /user : Create User.")
     @Test
     public void CreateUser_ReturnUser() throws Exception {
@@ -126,6 +128,8 @@ public class UserControllerTest {
         // message analysis
     }
 
+    // Delete User
+
     @DisplayName("delete /user/id : Delete User.")
     @Test
     public void DeleteUser_ReturnOk() throws Exception {
@@ -138,10 +142,9 @@ public class UserControllerTest {
         // message analysis
     }
 
-    @DisplayName("delete /user/id : Failing.")
+    @DisplayName("delete /user/id : Can't delete the target User.")
     @Test
     public void DeleteUser_Exception() throws Exception {
-        // when(userService).deleteUser(Mockito.anyLong());
         Mockito.doThrow(new IllegalArgumentException()).when(userService).deleteUser(Mockito.any());
 
         ResultActions response = mockMvc.perform(delete("/user/1"));
@@ -149,6 +152,32 @@ public class UserControllerTest {
         verify(userService, times(1)).deleteUser(Mockito.any());
         response.andExpect(MockMvcResultMatchers.status().isBadRequest());
         // message analysis
+    }
+
+    // Update User
+
+    @DisplayName("put /user/id : Create User.")
+    @Test
+    public void UpdateUser_ReturnUpdatedUser() throws Exception {
+
+        clearInvocations(userService);
+
+        User[] updatedUser = new User[1];
+
+        given(userService.saveUser(ArgumentMatchers.any())).willAnswer((invocation -> {
+            updatedUser[0] = (User) invocation.getArgument(0);
+            return invocation.getArgument(0);
+        }));
+        given(userService.getUser(1L)).willAnswer((invocation -> user1)).willAnswer((invocation -> updatedUser[0]));
+
+        ResultActions response = mockMvc.perform(put("/user/1").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user2)));
+
+        verify(userService, times(1)).saveUser(Mockito.any());
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("Sophie")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("FONCEK")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("sophiefoncek@mail.com")));
     }
 
 }

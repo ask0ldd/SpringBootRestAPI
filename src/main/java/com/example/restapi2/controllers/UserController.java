@@ -67,6 +67,7 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
+    // create a dto with only first last and email for requestbody
     public ResponseEntity<?> updateEmployee(@PathVariable("id") final Long id, @RequestBody User user) {
         User currentUser = userService.getUser(id);
         if (currentUser != null) {
@@ -86,11 +87,7 @@ public class UserController {
                 currentUser.setEmail(mail);
             }
 
-            String password = user.getPassword();
-            if (password != null) {
-                currentUser.setPassword(password);
-            }
-            userService.saveUser(currentUser);
+            User modifiedUser = userService.saveUser(currentUser);
 
             return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
         } else {
