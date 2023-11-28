@@ -58,8 +58,12 @@ public class UserController {
 
     @PostMapping("/user")
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        User createdUser = userService.saveUser(user);
-        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
+        try {
+            User createdUser = userService.saveUser(user);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (Exception exception) {
+            return new ResponseEntity<>("Can't create the target User.", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/user/{id}")

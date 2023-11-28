@@ -100,6 +100,15 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("GINA")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("laurentgina@mail.com")));
     }
+
+    @DisplayName("post /user : Invalid Request Body.")
+    @Test
+    public void CreateInvalidUser_Exception() throws Exception {
+        ResultActions response = mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString("invalid body")));
+
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
 }
 
 /*
