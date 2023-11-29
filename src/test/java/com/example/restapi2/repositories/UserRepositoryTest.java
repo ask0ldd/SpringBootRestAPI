@@ -7,7 +7,11 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import com.example.restapi2.models.User;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,6 +48,28 @@ public class UserRepositoryTest {
         Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user4.getLastname());
         Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user4.getPassword());
         Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user4.getEmail());
+    }
+
+    @DisplayName("FindAll() returns the 5 expected Users")
+    @Test
+    public void findAll_ReturnFiveSavedUsers() {
+        userRepository.save(user4);
+        userRepository.save(user5);
+        Iterable<User> users = userRepository.findAll();
+        Assertions.assertThat(users).isNotNull();
+        Assertions.assertThat(StreamSupport.stream(users.spliterator(), false).count()).isEqualTo(5);
+        List<String> emails = new ArrayList<String>();
+        emails.add("laurentgina@mail.com");
+        emails.add("sophiefoncek@mail.com");
+        emails.add("agathefeeling@mail.com");
+        emails.add("email1@domain.com");
+        emails.add("email2@domain.com");
+
+        int i = 0;
+        for (Iterator<User> it = users.iterator(); it.hasNext(); i++) {
+            User user = it.next();
+            Assertions.assertThat(user.getEmail()).isEqualTo(emails.get(i));
+        }
     }
 
 }
