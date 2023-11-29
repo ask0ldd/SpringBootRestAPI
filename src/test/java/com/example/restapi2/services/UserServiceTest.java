@@ -70,7 +70,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("User doesn't exist : .getUser(id) should return an empty Optional")
-    public void getUser_ReturnEmptyOptional() {
+    public void getUnknownUser_Throws() {
 
         when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(null));
 
@@ -167,8 +167,8 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("User doesn't exist : .getUserByEmail(email) should return an emptyOptional")
-    public void getUserByEmail_ReturnEmptyOptional() {
+    @DisplayName("User doesn't exist : .getUserByEmail(email) should throw")
+    public void getUnknownUserByEmail_Throws() {
 
         when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.ofNullable(null));
 
@@ -217,7 +217,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("Try Deleting a non-existent User")
-    public void deleteNonExistentUser() {
+    public void deleteUnknownUser_Throws() {
 
         when(userRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(null));
 

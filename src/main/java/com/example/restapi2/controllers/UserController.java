@@ -33,6 +33,7 @@ public class UserController {
      */
     @GetMapping("/users")
     public Iterable<User> getUsers() {
+        // throw if iterable empty
         return userService.getUsers();
     }
 
@@ -69,8 +70,9 @@ public class UserController {
     @PutMapping("/user/{id}")
     // create a dto with only first last and email for requestbody
     public ResponseEntity<?> updateEmployee(@PathVariable("id") final Long id, @RequestBody User user) {
-        User currentUser = userService.getUser(id);
-        if (currentUser != null) {
+
+        try {
+            User currentUser = userService.getUser(id); // !!! deal with throw
 
             String firstName = user.getFirstname();
             if (firstName != null && validationService.isName(firstName)) {
@@ -90,7 +92,7 @@ public class UserController {
             User modifiedUser = userService.saveUser(currentUser);
 
             return new ResponseEntity<>(/* userService.getUser(id) */ modifiedUser, HttpStatus.OK);
-        } else {
+        } catch (Exception exception) {
             return new ResponseEntity<>("Can't find the requested User.", HttpStatus.NOT_FOUND);
         }
     }

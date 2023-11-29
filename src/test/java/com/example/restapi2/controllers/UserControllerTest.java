@@ -22,9 +22,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,23 +59,6 @@ public class UserControllerTest {
     private final User user2 = new User(2L, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie");
     private final User user3 = new User(3L, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe");
     private final User user1Replacement = new User(1L, "John", "DOE", "johndoe@mail.com", "john");
-
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-    private final PrintStream originalErr = System.err;
-
-    @Before
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-        System.setErr(new PrintStream(errContent));
-    }
-
-    @After
-    public void restoreStreams() {
-        System.setOut(originalOut);
-        System.setErr(originalErr);
-    }
 
     // When Exception : Failed to load ApplicationContext for
     // [WebMergedContextConfiguration
@@ -186,26 +171,17 @@ public class UserControllerTest {
     public void UpdateUser_ReturnUpdatedUser() throws Exception {
 
         clearInvocations(userService);
+        reset(userService);
 
-        User[] updatedUser = new User[1];
-
-        given(userService.getUser(Mockito.anyLong())).willAnswer((invocation -> user1));
-
-        given(userService.saveUser(any(User.class))).willAnswer((invocation -> {
-            updatedUser[0] = (User) invocation.getArgument(0);
-            Assertions.assertThat(updatedUser[0]).isEqualTo(user1Replacement);
-            return updatedUser[0];
+        when(validationService.isName(Mockito.anyString())).thenReturn(true);
+        when(validationService.isEmail(Mockito.anyString())).thenReturn(true);
+        when(userService.getUser(Mockito.anyLong())).thenReturn(user1);
+        given(userService.saveUser(ArgumentMatchers.any())).willAnswer((invocation -> {
+            return invocation.getArgument(0);
         }));
-
-        // System.out.print(updatedUser[0]);
-
-        // given(userService.getUser(Mockito.any())).willAnswer((invocation ->
-        // updatedUser[0]));
 
         ResultActions response = mockMvc.perform(put("/user/1").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user1Replacement)));
-
-        Assertions.assertThat(updatedUser[0]).isEqualTo(user1Replacement);
 
         verify(userService, times(1)).saveUser(Mockito.any());
         response.andExpect(MockMvcResultMatchers.status().isOk())
