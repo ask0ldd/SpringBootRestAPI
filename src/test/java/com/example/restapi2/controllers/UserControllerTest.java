@@ -1,9 +1,6 @@
 package com.example.restapi2.controllers;
 
-import org.assertj.core.api.Assertions;
 import org.hamcrest.CoreMatchers;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
@@ -32,8 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 
 import com.example.restapi2.models.User;
@@ -187,7 +179,20 @@ public class UserControllerTest {
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("John")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("DOE")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("johndoe@mail.com")));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("johndoe@mail.com")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.password", CoreMatchers.is("laurent")));
+    }
+
+    @DisplayName("update /user/id : Invalid Request Body.")
+    @Test
+    public void UpdateInvalidUser_BadRequest() throws Exception {
+        ResultActions response = mockMvc.perform(put("/user/1").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString("invalid request body")));
+
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", CoreMatchers.is("John")));
+        // message analysis
     }
 
 }
