@@ -1,7 +1,9 @@
 package com.example.restapi2.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -93,7 +95,9 @@ public class UserController {
 
             return new ResponseEntity<>(/* userService.getUser(id) */ modifiedUser, HttpStatus.OK);
         } catch (Exception exception) {
-            return new ResponseEntity<>("Can't find the requested User.", HttpStatus.NOT_FOUND);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity<>("Can't find the requested User.", headers, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -103,7 +107,9 @@ public class UserController {
             userService.deleteUser(id);
             return new ResponseEntity<>("User with the following Id deleted : " + id, HttpStatus.OK);
         } catch (Exception exception) {
-            return new ResponseEntity<>("Can't delete the target User.", HttpStatus.BAD_REQUEST);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity<>("Can't delete the target User.", headers, HttpStatus.BAD_REQUEST);
         }
     }
 
