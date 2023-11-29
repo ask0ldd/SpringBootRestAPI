@@ -89,7 +89,7 @@ public class UserController {
 
             User modifiedUser = userService.saveUser(currentUser);
 
-            return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
+            return new ResponseEntity<>(/* userService.getUser(id) */ modifiedUser, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Can't find the requested User.", HttpStatus.NOT_FOUND);
         }

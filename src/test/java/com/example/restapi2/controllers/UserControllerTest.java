@@ -1,6 +1,9 @@
 package com.example.restapi2.controllers;
 
+import org.assertj.core.api.Assertions;
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.clearInvocations;
@@ -25,6 +29,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import com.example.restapi2.models.User;
@@ -49,6 +56,24 @@ public class UserControllerTest {
     private final User user1 = new User(1L, "Laurent", "GINA", "laurentgina@mail.com", "laurent");
     private final User user2 = new User(2L, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie");
     private final User user3 = new User(3L, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe");
+    private final User user1Replacement = new User(1L, "John", "DOE", "johndoe@mail.com", "john");
+
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
+    private final PrintStream originalErr = System.err;
+
+    @Before
+    public void setUpStreams() {
+        System.setOut(new PrintStream(outContent));
+        System.setErr(new PrintStream(errContent));
+    }
+
+    @After
+    public void restoreStreams() {
+        System.setOut(originalOut);
+        System.setErr(originalErr);
+    }
 
     // When Exception : Failed to load ApplicationContext for
     // [WebMergedContextConfiguration
@@ -164,20 +189,29 @@ public class UserControllerTest {
 
         User[] updatedUser = new User[1];
 
-        given(userService.saveUser(ArgumentMatchers.any())).willAnswer((invocation -> {
+        given(userService.getUser(Mockito.anyLong())).willAnswer((invocation -> user1));
+
+        given(userService.saveUser(any(User.class))).willAnswer((invocation -> {
             updatedUser[0] = (User) invocation.getArgument(0);
-            return invocation.getArgument(0);
+            Assertions.assertThat(updatedUser[0]).isEqualTo(user1Replacement);
+            return updatedUser[0];
         }));
-        given(userService.getUser(1L)).willAnswer((invocation -> user1)).willAnswer((invocation -> updatedUser[0]));
+
+        // System.out.print(updatedUser[0]);
+
+        // given(userService.getUser(Mockito.any())).willAnswer((invocation ->
+        // updatedUser[0]));
 
         ResultActions response = mockMvc.perform(put("/user/1").contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(user2)));
+                .content(objectMapper.writeValueAsString(user1Replacement)));
+
+        Assertions.assertThat(updatedUser[0]).isEqualTo(user1Replacement);
 
         verify(userService, times(1)).saveUser(Mockito.any());
         response.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("Sophie")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("FONCEK")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("sophiefoncek@mail.com")));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstname", CoreMatchers.is("John")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastname", CoreMatchers.is("DOE")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is("johndoe@mail.com")));
     }
 
 }
