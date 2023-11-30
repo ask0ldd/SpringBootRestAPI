@@ -2,10 +2,15 @@ package com.example.restapi2.repositories;
 
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
+import com.example.restapi2.exceptions.UserNotFoundException;
 import com.example.restapi2.models.User;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,6 +40,8 @@ public class UserRepositoryTest {
             "updatedemail3@domain.com",
             "randomPassword1");
     private final User user5 = new User(5L, "firstname2", "lastname2", "email2@domain.com", "randomPassword2");
+    private final User user6Invalid = new User(6L, "firstname2", "lastname2", "laurentgina@mail.com",
+            "randomPassword2");
 
     @DisplayName("Save() saves one User into DB.")
     @Test
@@ -51,6 +58,16 @@ public class UserRepositoryTest {
         Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user4.getLastname());
         Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user4.getPassword());
         Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user4.getEmail());
+    }
+
+    @DisplayName("Save() with invalid User / redundant email.")
+    @Test
+    public void saveUser_ThrowsException() {
+        Assertions.assertThat(userRepository.findById(4L).isPresent()).isFalse();
+
+        Exception exception = assertThrows(DataIntegrityViolationException.class, () -> {
+            userRepository.save(user6Invalid);
+        });
     }
 
     @DisplayName("FindAll() returns the 5 expected Users")
