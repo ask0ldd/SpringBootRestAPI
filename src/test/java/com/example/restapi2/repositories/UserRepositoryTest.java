@@ -43,6 +43,8 @@ public class UserRepositoryTest {
     private final User user5 = new User(5L, "firstname2", "lastname2", "email2@domain.com", "randomPassword2");
     private final User user6Invalid = new User(6L, "firstname2", "lastname2", "laurentgina@mail.com",
             "randomPassword2");
+    private final User user4Invalid = new User(4L, "firstname2", "lastname2", "laurentgina@mail.com",
+            "randomPassword2");
 
     @BeforeEach
     public void initTest() {
@@ -60,7 +62,7 @@ public class UserRepositoryTest {
         Assertions.assertThat(userRepository.findById(4L).isPresent()).isFalse();
 
         userRepository.save(user4);
-        // 4L since 3 users are created when initializing the context
+        // 4L since 3 users are already created when initializing the context
         Optional<User> collectedUser = userRepository.findById(4L);
 
         Assertions.assertThat(collectedUser.isPresent()).isTrue();
@@ -175,5 +177,24 @@ public class UserRepositoryTest {
         Assertions.assertThat(postUpdateCollectedUser.get().getLastname()).isEqualTo("updated lastname3");
         Assertions.assertThat(postUpdateCollectedUser.get().getPassword()).isEqualTo("randomPassword1");
         Assertions.assertThat(postUpdateCollectedUser.get().getEmail()).isEqualTo("updatedemail3@domain.com");
+    }
+
+    @DisplayName("Update() called with an invalid User")
+    @Test
+    public void update_ThrowsException() {
+        userRepository.save(user4);
+        Optional<User> collectedUser = userRepository.findById(1L);
+        Assertions.assertThat(collectedUser.isPresent()).isTrue();
+        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user1.getFirstname());
+        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
+        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
+        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
+
+        Exception exception = assertThrows(DataIntegrityViolationException.class, () -> {
+            userRepository.save(user4Invalid);
+        });
+
+        Assertions.assertThat(exception.getMessage()).contains("Unique index or primary key violation");
     }
 }
