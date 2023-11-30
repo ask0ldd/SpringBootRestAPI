@@ -6,11 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
-import com.example.restapi2.exceptions.UserNotFoundException;
 import com.example.restapi2.models.User;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import org.assertj.core.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,18 +30,25 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private final User user1 = new User(1L, "Laurent", "GINA", "laurentgina@mail.com", "laurent");
-    private final User user2 = new User(2L, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie");
-    private final User user3 = new User(3L, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe");
-    private final User user4 = new User(4L, "firstname1", "lastname1", "email1@domain.com", "randomPassword1");
+    // private final User user1 = new User(1L, "Laurent", "GINA",
+    // "laurentgina@mail.com", "laurent");
+    private final User user1 = User.builder().userId(1L).firstname("Laurent").lastname("GINA")
+            .email("laurentgina@mail.com").password("laurent").build();
+    private final User user2 = User.builder().userId(2L).firstname("Sophie").lastname("FONCEK")
+            .email("sophiefoncek@mail.com").password("sophie").build();
+    private final User user3 = User.builder().userId(3L).firstname("Agathe").lastname("FEELING")
+            .email("agathefeeling@mail.com").password("agathe").build();
+    private final User user4 = User.builder().userId(4L).firstname("firstname1").lastname("lastname1")
+            .email("email1@domain.com").password("randomPassword1").build();
     private final User user4Replacement = new User(1L, "updated firstname3", "updated lastname3",
             "updatedemail3@domain.com",
             "randomPassword1");
-    private final User user5 = new User(5L, "firstname2", "lastname2", "email2@domain.com", "randomPassword2");
-    private final User user6Invalid = new User(6L, "firstname2", "lastname2", "laurentgina@mail.com",
-            "randomPassword2");
-    private final User user4Invalid = new User(4L, "firstname2", "lastname2", "laurentgina@mail.com",
-            "randomPassword2");
+    private final User user5 = User.builder().userId(5L).firstname("firstname2").lastname("lastname2")
+            .email("email2@domain.com").password("randomPassword2").build();
+    private final User user6Invalid = User.builder().userId(6L).firstname("firstname2").lastname("lastname2")
+            .email("laurentgina@mail.com").password("randomPassword2").build();
+    private final User user4Invalid = User.builder().userId(4L).firstname("firstname2").lastname("lastname2")
+            .email("laurentgina@mail.com").password("randomPassword2").build();
 
     @BeforeEach
     public void initTest() {

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "utilisateurs")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 /* spring security needs some UserDetails methods to be implemented */
 public class User {
 
