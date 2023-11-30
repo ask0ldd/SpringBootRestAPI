@@ -20,6 +20,7 @@ import java.util.stream.StreamSupport;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
@@ -43,9 +44,19 @@ public class UserRepositoryTest {
     private final User user6Invalid = new User(6L, "firstname2", "lastname2", "laurentgina@mail.com",
             "randomPassword2");
 
+    @BeforeEach
+    public void initTest() {
+        /*
+         * userRepository.deleteById(1L);
+         * userRepository.deleteById(2L);
+         * userRepository.deleteById(3L);
+         */
+    }
+
     @DisplayName("Save() saves one User into DB.")
     @Test
     public void saveUser_ReturnSavedUserFromDB() {
+
         Assertions.assertThat(userRepository.findById(4L).isPresent()).isFalse();
 
         userRepository.save(user4);
@@ -68,6 +79,8 @@ public class UserRepositoryTest {
         Exception exception = assertThrows(DataIntegrityViolationException.class, () -> {
             userRepository.save(user6Invalid);
         });
+
+        Assertions.assertThat(exception.getMessage()).contains("Unique index or primary key violation");
     }
 
     @DisplayName("FindAll() returns the 5 expected Users")
@@ -105,6 +118,13 @@ public class UserRepositoryTest {
         Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user4.getEmail());
     }
 
+    @DisplayName("FindById() missing User")
+    @Test
+    public void findById_ReturnEmptyOptional() {
+        Optional<User> user = userRepository.findById(4L);
+        Assertions.assertThat(user.isEmpty()).isTrue();
+    }
+
     @DisplayName("findByEmail() returns the expected user")
     @Test
     public void findByEmail_ReturnOneTargetUser() {
@@ -116,6 +136,13 @@ public class UserRepositoryTest {
         Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user4.getLastname());
         Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user4.getPassword());
         Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user4.getEmail());
+    }
+
+    @DisplayName("FindByEmail() missing User")
+    @Test
+    public void findByEmail_ReturnEmptyOptional() {
+        Optional<User> user = userRepository.findByEmail("email1@domain.com");
+        Assertions.assertThat(user.isEmpty()).isTrue();
     }
 
     @DisplayName("Delete() returns an empty optional")

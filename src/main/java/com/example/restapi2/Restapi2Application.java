@@ -23,7 +23,10 @@ public class Restapi2Application implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 
 		// BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		this.createBaseUser();
+	}
 
+	private void createBaseUser() {
 		userService.saveUser(new User(null, "Laurent", "GINA", "laurentgina@mail.com", "laurent"));
 		userService.saveUser(new User(null, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie"));
 		userService.saveUser(new User(null, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe"));
