@@ -31,6 +31,9 @@ public class UserRepositoryTest {
     private final User user2 = new User(2L, "Sophie", "FONCEK", "sophiefoncek@mail.com", "sophie");
     private final User user3 = new User(3L, "Agathe", "FEELING", "agathefeeling@mail.com", "agathe");
     private final User user4 = new User(4L, "firstname1", "lastname1", "email1@domain.com", "randomPassword1");
+    private final User user4Replacement = new User(1L, "updated firstname3", "updated lastname3",
+            "updatedemail3@domain.com",
+            "randomPassword1");
     private final User user5 = new User(5L, "firstname2", "lastname2", "email2@domain.com", "randomPassword2");
 
     @DisplayName("Save() saves one User into DB.")
@@ -72,4 +75,61 @@ public class UserRepositoryTest {
         }
     }
 
+    @DisplayName("FindById() returns the expected user")
+    @Test
+    public void findById_ReturnOneTargetUser() {
+        userRepository.save(user4);
+        Optional<User> collectedUser = userRepository.findById(4L);
+        Assertions.assertThat(collectedUser.isPresent()).isTrue();
+        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user4.getFirstname());
+        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user4.getLastname());
+        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user4.getPassword());
+        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user4.getEmail());
+    }
+
+    @DisplayName("findByEmail() returns the expected user")
+    @Test
+    public void findByEmail_ReturnOneTargetUser() {
+        userRepository.save(user4);
+        Optional<User> collectedUser = userRepository.findByEmail("email1@domain.com");
+        Assertions.assertThat(collectedUser.isPresent()).isTrue();
+        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user4.getFirstname());
+        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user4.getLastname());
+        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user4.getPassword());
+        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user4.getEmail());
+    }
+
+    @DisplayName("Delete() returns an empty optional")
+    @Test
+    public void delete_ReturnAnEmptyOptional() {
+        userRepository.save(user4);
+        Optional<User> collectedUser = userRepository.findById(4L);
+        Assertions.assertThat(collectedUser.isPresent()).isTrue();
+        userRepository.deleteById(collectedUser.get().getUserId());
+        Optional<User> postDeletionCollectedUser = userRepository.findById(4L);
+        Assertions.assertThat(postDeletionCollectedUser.isEmpty()).isTrue();
+    }
+
+    @DisplayName("Update() replaces the expected user")
+    @Test
+    public void update_ReplaceTheExpectedUser() {
+        userRepository.save(user4);
+        Optional<User> collectedUser = userRepository.findById(1L);
+        Assertions.assertThat(collectedUser.isPresent()).isTrue();
+        Assertions.assertThat(collectedUser.get().getUserId()).isGreaterThan(0);
+        Assertions.assertThat(collectedUser.get().getFirstname()).isEqualTo(user1.getFirstname());
+        Assertions.assertThat(collectedUser.get().getLastname()).isEqualTo(user1.getLastname());
+        Assertions.assertThat(collectedUser.get().getPassword()).isEqualTo(user1.getPassword());
+        Assertions.assertThat(collectedUser.get().getEmail()).isEqualTo(user1.getEmail());
+
+        userRepository.save(user4Replacement);
+        Optional<User> postUpdateCollectedUser = userRepository.findById(1L);
+        Assertions.assertThat(postUpdateCollectedUser.isPresent()).isTrue();
+        Assertions.assertThat(postUpdateCollectedUser.get().getFirstname()).isEqualTo("updated firstname3");
+        Assertions.assertThat(postUpdateCollectedUser.get().getLastname()).isEqualTo("updated lastname3");
+        Assertions.assertThat(postUpdateCollectedUser.get().getPassword()).isEqualTo("randomPassword1");
+        Assertions.assertThat(postUpdateCollectedUser.get().getEmail()).isEqualTo("updatedemail3@domain.com");
+    }
 }
